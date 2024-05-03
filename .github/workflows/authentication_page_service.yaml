@@ -9,7 +9,6 @@ on:
   pull_request:
     branches: [ "main" ]
 
-
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}-page
@@ -52,9 +51,11 @@ jobs:
 
       - name: Install dependencies
         run: npm install
+        working-directory: authentication_page_service
 
       - name: Build Node application
         run: npm run build
+        working-directory: authentication_page_service
 
       - name: Extract Docker metadata
         id: meta
@@ -66,7 +67,6 @@ jobs:
             type=ref,event=tag
             type=semver,pattern={{version}}
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
-
 
       - name: Build and push Docker image (skip push on PRs)
         id: build-and-push
