@@ -42,7 +42,7 @@ jobs:
 
       - name: Install cosign (for non-PRs)
         if: github.event_name != 'pull_request'
-        uses:  working-directory: jwt_authentication_servicesigstore/cosign-installer@main
+        uses: sigstore/cosign-installer@main
         with:
           cosign-release: 'v1.13.1'
 
