@@ -76,7 +76,7 @@ jobs:
         id: build-and-push
         uses: docker/build-push-action@v5
         with:
-          context: ./jwt_authentication_service
+          context: .
           file: src/main/docker/Dockerfile.native
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
