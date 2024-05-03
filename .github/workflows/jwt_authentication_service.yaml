@@ -51,7 +51,7 @@ jobs:
 
       - name: Build native executable
         working-directory: jwt_authentication_service
-        run: ./mvnw package -Dnative -Dquarkus.native.container-build=true
+        run: ./mvnw package -Dnative
 
       - name: Setup Docker buildx
         uses: docker/setup-buildx-action@v3
