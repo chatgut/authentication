@@ -1,0 +1,9 @@
+[submodule "jwt_authentication_service"]
+	path = jwt_authentication_service
+	url = https://github.com/Ebyrdeu/jwt_authentication_service
+[submodule "authentication_page_service"]
+	path = authentication_page_service
+	url = https://github.com/Ebyrdeu/authentication_page_service
+[submodule "hashing_service"]
+	path = hashing_service
+	url = https://github.com/Ebyrdeu/hashing_service
