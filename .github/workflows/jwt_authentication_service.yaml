@@ -26,8 +26,11 @@ jobs:
         with:
           submodules: recursive
 
-      - name: List files in jwt_authentication_service directory
-        run: ls -lR jwt_authentication_service
+      - name: List files
+        run: ls -lR
+
+      - name: List jwt_authentication_service/src/main/docker directory contents
+        run: ls -al jwt_authentication_service/src/main/docker
 
       - name: Set up Java
         uses: actions/setup-java@v4
