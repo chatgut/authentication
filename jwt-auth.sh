@@ -14,6 +14,7 @@ else
     mvn package -Dnative
 fi
 
+
 # Build the Docker image
 docker build -f src/main/docker/Dockerfile.native -t app/jwt_authentication_service .
 
