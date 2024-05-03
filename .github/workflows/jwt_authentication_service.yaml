@@ -42,11 +42,12 @@ jobs:
 
       - name: Install cosign (for non-PRs)
         if: github.event_name != 'pull_request'
-        uses: sigstore/cosign-installer@main
+        uses:  working-directory: jwt_authentication_servicesigstore/cosign-installer@main
         with:
           cosign-release: 'v1.13.1'
 
       - name: Build native executable
+        working-directory: jwt_authentication_service
         run: ./mvnw package -Dnative -Dquarkus.native.container-build=true
 
       - name: Setup Docker buildx
