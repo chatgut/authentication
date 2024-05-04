@@ -26,6 +26,17 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Create Private Key
+        run: |
+          echo "${{ secrets.PRIVATE_KEY }}" > src/main/resources/privateKey.pem
+          chmod 600 src/main/resources/privateKey.pem
+
+
+      - name: Create Public Key
+        run: |
+          echo "${{ secrets.PUBLIC_KEY }}" > src/main/resources/publicKey.pem
+          chmod 600 src/main/resources/publicKey.pem
+
       - name: List files
         run: ls -lR
 
@@ -98,3 +109,9 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Remove Private Key
+        run: rm -f src/main/resources/privateKey.pem
+
+      - name: Remove Public Key
+        run: rm -f src/main/resources/publicKey.pem
