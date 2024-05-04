@@ -28,8 +28,8 @@ jobs:
 
       - name: Create Private Key
         run: |
-          echo "${{ secrets.PRIVATE_KEY }}" > src/main/resources/privateKey.pem
-          chmod 600 src/main/resources/privateKey.pem
+          echo "${{ secrets.PRIVATE_KEY }}" > ${{ github.workspace }}/jwt_authentication_service/src/main/resources/privateKey.pem
+          chmod 600 ${{ github.workspace }}/jwt_authentication_service/src/main/resources/privateKey.pem
 
 
       - name: Create Public Key
