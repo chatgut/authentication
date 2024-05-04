@@ -34,8 +34,8 @@ jobs:
 
       - name: Create Public Key
         run: |
-          echo "${{ secrets.PUBLIC_KEY }}" > src/main/resources/publicKey.pem
-          chmod 600 src/main/resources/publicKey.pem
+          echo "${{ secrets.PUBLIC_KEY }}" > ${{ github.workspace }}/jwt_authentication_service/src/main/resources/publicKey.pem
+          chmod 600 ${{ github.workspace }}/jwt_authentication_service/src/main/resources/publicKey.pem
 
       - name: List files
         run: ls -lR
@@ -111,7 +111,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Remove Private Key
-        run: rm -f src/main/resources/privateKey.pem
+        run: rm -f ${{ github.workspace }}/jwt_authentication_service/src/main/resources/privateKey.pem
 
       - name: Remove Public Key
-        run: rm -f src/main/resources/publicKey.pem
+        run: rm -f ${{ github.workspace }}/jwt_authentication_service/src/main/resources/publicKey.pem
