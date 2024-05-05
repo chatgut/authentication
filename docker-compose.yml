@@ -1,25 +1,40 @@
 services:
   frontend:
+    container_name: frontend
     build:
       context: ./authentication_page_service
       dockerfile: Dockerfile
-    container_name: frontend
     restart: unless-stopped
     ports:
       - "3000:3000"
   password_encryption:
+    container_name: password_encryption
     build:
       context: ./hashing_service
       dockerfile: Dockerfile
-    container_name: password_encryption
     restart: unless-stopped
     ports:
-      - "8888:8888"
+      - "8810:8810"
   jwt_auth:
     container_name: jwt_auth
     build:
       context: ./jwt_authentication_service
-      dockerfile: src/main/docker/Dockerfile.native
+      dockerfile: jwt_authentication_service/src/main/docker/Dockerfile
     restart: unless-stopped
     ports:
       - "8080:8080"
+  postgresql:
+    container_name: database-postgresql
+    build:
+      context: ./postgresql_docker
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: 0.25
+          memory: "128M"
+    environment:
+      - POSTGRES_PASSWORD=root
+    ports:
+      - "5432:5432"
