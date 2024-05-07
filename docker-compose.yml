@@ -1,3 +1,4 @@
+version: "3.8"
 services:
   frontend:
     container_name: frontend
@@ -13,14 +14,23 @@ services:
       context: ./hashing_service
       dockerfile: Dockerfile
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: 0.15
+          memory: "8M"
+    environment:
+      PORT: "8810"
     ports:
       - "8810:8810"
   jwt_auth:
     container_name: jwt_auth
     build:
       context: ./jwt_authentication_service
-      dockerfile: jwt_authentication_service/src/main/docker/Dockerfile
+      dockerfile: ./src/main/docker/Dockerfile
     restart: unless-stopped
+    environment:
+      - JAEGER_HOST=http://jaeger:4317
     ports:
       - "8080:8080"
   postgresql:
@@ -38,3 +48,19 @@ services:
       - POSTGRES_PASSWORD=root
     ports:
       - "5432:5432"
+  jaeger:
+    container_name: jaeger
+    image: jaegertracing/all-in-one:latest
+    deploy:
+      resources:
+        limits:
+          cpus: 0.25
+          memory: "64M"
+    ports:
+      - "16686:16686" # Jaeger UI
+      - "14268:14268" # Receive legacy OpenTracing traces, optional
+      - "4317:4317"   # OTLP gRPC receiver
+      - "4318:4318"   # OTLP HTTP receiver, not yet used by Quarkus, optional
+      - "14250:14250" # Receive from external otel-collector, optional
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
