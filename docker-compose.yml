@@ -1,57 +1,28 @@
 services:
-  frontend:
-    container_name: frontend
-    build:
-      context: ./authentication_page_service
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-  password_encryption:
-    container_name: password_encryption
-    build:
-      context: ./hashing_service
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: 0.15
-          memory: "32M"
-    environment:
-      RUST_BACKTRACE: 1
-      OTLP_ENDPOINT: http://jaeger:4317
-      PORT: "8810"
-    ports:
-      - "8810:8810"
-  jwt_auth:
-    container_name: jwt_auth
-    build:
-      context: ./jwt_authentication_service
-      dockerfile: ./src/main/docker/Dockerfile
-    restart: unless-stopped
-    environment:
-      JAEGER_HOST: http://jaeger:4317
-    ports:
-      - "8080:8080"
   postgresql:
-    container_name: database-postgresql
-    build:
-      context: ./postgresql_docker
-      dockerfile: Dockerfile
+    container_name: postgresql
+    image: postgres:alpine
     restart: unless-stopped
+    networks:
+      - api-auth
     deploy:
       resources:
         limits:
           cpus: 0.25
           memory: "128M"
     environment:
-      POSTGRES_PASSWORD: root
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespw
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   jaeger:
     container_name: jaeger
     image: jaegertracing/all-in-one:latest
+    networks:
+      - api-auth
     deploy:
       resources:
         limits:
@@ -65,3 +36,62 @@ services:
       - "14250:14250" # Receive from external otel-collector, optional
     environment:
       COLLECTOR_OTLP_ENABLED: true
+
+  frontend:
+    container_name: frontend
+    image: app/frontend
+    build:
+      context: ./authentication_page_service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    networks:
+      - api-auth
+    ports:
+      - "3000:3000"
+
+  password_encryption:
+    container_name: pwd
+    image: app/hashing-salting
+    build:
+      context: ./hashing_service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    networks:
+      - api-auth
+    deploy:
+      resources:
+        limits:
+          cpus: 0.15
+          memory: "32M"
+    environment:
+      RUST_BACKTRACE: 1
+      OTLP_ENDPOINT: http://jaeger:4317
+      PORT: "8820"
+    ports:
+      - "8820:8820"
+
+  jwt_auth:
+    container_name: jwt_auth
+    build:
+      context: ./jwt_authentication_service
+      dockerfile: ./src/main/docker/Dockerfile
+    restart: unless-stopped
+    networks:
+      - api-auth
+    environment:
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgrespw
+      DB_HOST: postgresql
+      SALT_SERVICE: http://pwd:8820
+      OTLP_ENDPOINT: http://jaeger:4317
+    ports:
+      - "8810:8810"
+    depends_on:
+      - postgresql
+      - password_encryption
+
+networks:
+  api-auth:
+
+volumes:
+  postgres_data:

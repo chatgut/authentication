@@ -26,10 +26,4 @@ Set-Location -Path authentication_page_service -ErrorAction Stop
 docker build -f Dockerfile -t app/frontend .
 Set-Location -Path ..
 
-# Build PostGreSQL Image
-# Navigate to directory
-Set-Location -Path postgresql_docker -ErrorAction Stop
-docker build -t app/database-postgresql .
-Set-Location -Path ..
-
 Write-Host "Done"

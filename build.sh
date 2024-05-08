@@ -26,9 +26,4 @@ cd authentication_page_service || exit
 docker build -f Dockerfile -t app/frontend .
 cd ..
 
-# Build PostGreSQL Image
-cd postgresql_docker || exit
-docker build -t app/database-postgresql .
-cd ..
-
 echo "Done"
