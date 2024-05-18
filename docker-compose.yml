@@ -3,8 +3,6 @@ services:
     container_name: postgresql
     image: postgres:alpine
     restart: unless-stopped
-    networks:
-      - api-auth
     deploy:
       resources:
         limits:
@@ -18,11 +16,10 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  jaeger:
-    container_name: jaeger
+  jaeger-service:
+    container_name: jaeger-service
     image: jaegertracing/all-in-one:latest
-    networks:
-      - api-auth
+    restart: unless-stopped
     deploy:
       resources:
         limits:
@@ -37,27 +34,24 @@ services:
     environment:
       COLLECTOR_OTLP_ENABLED: true
 
-  frontend:
-    container_name: frontend
-    image: app/frontend
+  frontend-service:
+    container_name: frontend-service
     build:
       context: ./authentication_page_service
       dockerfile: Dockerfile
     restart: unless-stopped
-    networks:
-      - api-auth
+    environment:
+      PWD_SERVICE: http://auth-service:8080
+      APP_SERVICE_URL: https://www.microsoft.com
     ports:
       - "3000:3000"
 
-  password_encryption:
-    container_name: pwd
-    image: app/hashing-salting
+  pwd-hashing-service:
+    container_name: pwd-hashing-service
     build:
       context: ./hashing_service
       dockerfile: Dockerfile
     restart: unless-stopped
-    networks:
-      - api-auth
     deploy:
       resources:
         limits:
@@ -65,33 +59,26 @@ services:
           memory: "32M"
     environment:
       RUST_BACKTRACE: 1
-      OTLP_ENDPOINT: http://jaeger:4317
+      OTLP_ENDPOINT: http://jaeger-service:4317
       PORT: "8820"
     ports:
       - "8820:8820"
 
-  jwt_auth:
-    container_name: jwt_auth
+  auth-service:
+    container_name: auth-service
     build:
       context: ./jwt_authentication_service
       dockerfile: ./src/main/docker/Dockerfile
     restart: unless-stopped
-    networks:
-      - api-auth
     environment:
       DB_USERNAME: postgres
       DB_PASSWORD: postgrespw
       DB_HOST: postgresql
-      SALT_SERVICE: http://pwd:8820
-      OTLP_ENDPOINT: http://jaeger:4317
+      SALT_SERVICE: http://pwd-hashing-service:8820
+      OTLP_ENDPOINT: http://jaeger-service:4317
     ports:
       - "8810:8810"
-    depends_on:
-      - postgresql
-      - password_encryption
 
-networks:
-  api-auth:
 
 volumes:
   postgres_data:
