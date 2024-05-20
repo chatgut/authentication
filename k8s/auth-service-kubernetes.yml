@@ -1,0 +1,66 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app.name: auth-service
+  name: auth-service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.name: auth-service
+  name: auth-service
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+      name: tcp-8080
+  selector:
+    app.name: auth-service
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.name: auth-service
+  name: auth-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.name: auth-service
+  template:
+    metadata:
+      labels:
+        app.name: auth-service
+    spec:
+      serviceAccountName: auth-service
+      containers:
+        - name: auth-service
+          image: ghcr.io/chatgut/authentication-jwt:latest
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              cpu: "0.25"
+              memory: "64Mi"
+            requests:
+              cpu: "0.25"
+              memory: "64Mi"
+          env:
+            - name: DB_USERNAME
+              value: postgres
+            - name: DB_PASSWORD
+              value: postgrespw
+            - name: DB_HOST
+              value: postgresql
+            - name: SALT_SERVICE
+              value: http://pwd-hashing-service:8820
+            - name: OTLP_ENDPOINT
+              value: http://jaeger-service:4317
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP

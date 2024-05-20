@@ -38,10 +38,11 @@ spec:
       labels:
         app.name: postgresql
     spec:
+      serviceAccountName: postgresql
       containers:
         - name: postgresql
-          image: app/database-postgresql
-          imagePullPolicy: Never
+          image: postgres:alpine
+          imagePullPolicy: IfNotPresent
           resources:
             limits:
               cpu: "0.25"
@@ -57,3 +58,26 @@ spec:
           ports:
             - containerPort: 5432
               protocol: TCP
+          volumeMounts:
+            - name: init-scripts
+              mountPath: /docker-entrypoint-initdb.d
+              readOnly: true
+      volumes:
+        - name: init-scripts
+          configMap:
+            name: postgres-init-scripts
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init-scripts
+data:
+  init.sql: |
+    CREATE TABLE "user"
+    (
+        id       SERIAL PRIMARY KEY,
+        username VARCHAR(255) NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        salt     VARCHAR(255) NOT NULL,
+        ip       VARCHAR(255) NOT NULL
+    );

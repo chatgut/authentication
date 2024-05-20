@@ -56,7 +56,7 @@ services:
       resources:
         limits:
           cpus: 0.15
-          memory: "32M"
+          memory: "16M"
     environment:
       RUST_BACKTRACE: 1
       OTLP_ENDPOINT: http://jaeger-service:4317
@@ -70,6 +70,11 @@ services:
       context: ./jwt_authentication_service
       dockerfile: ./src/main/docker/Dockerfile
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: 0.25
+          memory: "64M"
     environment:
       DB_USERNAME: postgres
       DB_PASSWORD: postgrespw

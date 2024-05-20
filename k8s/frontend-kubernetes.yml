@@ -1,0 +1,54 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app.name: frontend-service
+  name: frontend-service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.name: frontend-service
+  name: frontend-service
+spec:
+  ports:
+    - port: 3000
+      targetPort: 3000
+      nodePort: 31000
+      protocol: TCP
+      name: tcp-31000
+  selector:
+    app.name: frontend-service
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.name: frontend-service
+  name: frontend-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.name: frontend-service
+  template:
+    metadata:
+      labels:
+        app.name: frontend-service
+    spec:
+      serviceAccountName: frontend-service
+      containers:
+        - name: frontend-service
+          image: ghcr.io/chatgut/authentication-page:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PWD_SERVICE
+              value: http://auth-service:8080
+            - name: APP_SERVICE_URL
+              value: https://www.google.com
+          ports:
+            - containerPort: 80
+              protocol: TCP
